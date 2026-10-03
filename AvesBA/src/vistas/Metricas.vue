@@ -3,6 +3,6 @@
 <template>
   <div>
     <h1>Métricas</h1>
-    <p>Pantalla a cargo de otro integrante del equipo (dashboard de administrador).</p>
+    <p>Aca irian los graficos y metricas obtenidas de de los jugadores.</p>
   </div>
 </template>

@@ -3,6 +3,6 @@
 <template>
   <div>
     <h1>Datos del Jugador</h1>
-    <p>Pantalla a cargo de otro integrante del equipo.</p>
+    <p>Aca iriqan los datgos del jugador.</p>
   </div>
 </template>

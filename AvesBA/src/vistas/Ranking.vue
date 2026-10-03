@@ -3,6 +3,6 @@
 <template>
   <div>
     <h1>Ranking</h1>
-    <p>Pantalla a cargo de otro integrante del equipo.</p>
+    <p>Aca iria el ranking de los jugadores.</p>
   </div>
 </template>
