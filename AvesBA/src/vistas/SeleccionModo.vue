@@ -1,5 +1,7 @@
 <script setup>
 import JuegoImagenes from '../components/JuegoImagenes.vue';
+import {ref} from 'vue';
+const modo = ref('');
 
 </script>
 
@@ -14,12 +16,12 @@ import JuegoImagenes from '../components/JuegoImagenes.vue';
     </nav>
     <div class="contenido">
       <div class="modos">
-        <button type="button" class="boton-modo">Solo Imagen</button>
-        <button type="button" class="boton-modo">Solo Audios</button>
-        <button type="button" class="boton-modo">Ambas</button>
+        <button type="button" class="boton-modo" @click="modo = 'imagen'" :class="{ activo: modo === 'imagen'}">Solo Imagen</button>
+        <button type="button" class="boton-modo" @click="modo = 'audio'" :class="{ activo: modo === 'audio'}">Solo Audios</button>
+        <button type="button" class="boton-modo" @click="modo = 'ambas'" :class="{ activo: modo === 'ambas'}">Ambas</button>
       </div>
       <div class="area-juego">
-        <JuegoImagenes />
+        <JuegoImagenes v-if="modo === 'imagen'" />
       </div>
     </div>
   </div>
@@ -76,6 +78,12 @@ import JuegoImagenes from '../components/JuegoImagenes.vue';
   border-radius: 12px;
   width: 100%;
   max-width: 400px;
-  height: 250px;
+  min-height: 250px;
+  padding: 1rem;
+}
+
+.activo {
+  background: #38bdf8;
+  color: white;
 }
 </style>
