@@ -1,4 +1,7 @@
-<script setup></script>
+<script setup>
+import JuegoImagenes from '../components/JuegoImagenes.vue';
+
+</script>
 
 <template>
   <div class="contenedor">
@@ -15,7 +18,9 @@
         <button type="button" class="boton-modo">Solo Audios</button>
         <button type="button" class="boton-modo">Ambas</button>
       </div>
-      <div class="area-juego"></div>
+      <div class="area-juego">
+        <JuegoImagenes />
+      </div>
     </div>
   </div>
 </template>
