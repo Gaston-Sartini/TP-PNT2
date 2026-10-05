@@ -3,7 +3,7 @@ import JuegoImagenes from '../components/JuegoImagenes.vue';
 import {ref} from 'vue';
 const modo = ref('');
 function mostrarResultado(event) {
-    console.log('Partida terminada con aciertos:', event.aciertos, 'de', event.total);
+    console.log('Partida terminada con aciertos:', event.aciertos, 'de', event.total, 'y XP:', event.xp);
 }
 </script>
 

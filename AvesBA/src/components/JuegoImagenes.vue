@@ -4,6 +4,8 @@ import { obtenerAves } from '../servicios/avesService';
 import TarjetaAve from './TarjetaAve.vue';
 import BotonOption from './BotonOption.vue';
 import EstadoJuego from './EstadoJuego.vue';
+import MensajeResultado from './MensajeResultado.vue';
+import { computed } from 'vue';
 
 const aves = ref([]);
 const cargando = ref(false);
@@ -48,6 +50,10 @@ function responder(opcion) {
     elegida.value = opcion.id;
     if (opcion.id === pregunta.value.correcta.id) {
         aciertos.value++;
+        racha.value++;
+        xp.value += 10 + 5 * (racha.value - 1); // 10 XP base + 2 XP por cada acierto consecutivo
+    } else {
+        racha.value = 0;
     }
 }
 function estadoDe(opcion) {
@@ -61,6 +67,9 @@ const TOTAL_PREGUNTAS = 10;
 const numeroPregunta = ref(1);
 const aciertos = ref(0);
 const terminada = ref(false);
+const racha = ref(0);
+const xp = ref(0);
+const acerto = computed(() => elegida.value === pregunta.value.correcta.id);
 
 function siguientePregunta() {
     if (numeroPregunta.value < TOTAL_PREGUNTAS) {
@@ -68,7 +77,7 @@ function siguientePregunta() {
         nuevaPregunta();
     } else {
         terminada.value = true;
-        partidaTerminada('partidaTerminada', { aciertos: aciertos.value, total: TOTAL_PREGUNTAS });
+        partidaTerminada('partidaTerminada', { aciertos: aciertos.value, total: TOTAL_PREGUNTAS, xp: xp.value });
     }
 }
 const partidaTerminada = defineEmits(['partidaTerminada']);
@@ -76,6 +85,8 @@ function reiniciar() {
     numeroPregunta.value = 1;
     aciertos.value = 0;
     terminada.value = false;
+    racha.value = 0;
+    xp.value = 0;
     nuevaPregunta();
 }
 </script>
@@ -91,10 +102,11 @@ function reiniciar() {
         <div v-else-if="terminada">
             <p>Partida terminada!</p>
             <p>Aciertos: {{ aciertos }}</p>
+            <p>XP obtenida: {{ xp }}</p>            
             <button @click="reiniciar">Reiniciar</button>
         </div>
         <div v-else-if="pregunta">
-            <EstadoJuego :numeroPregunta="numeroPregunta" :aciertos="aciertos" :totalPreguntas="TOTAL_PREGUNTAS" />            
+            <EstadoJuego :numeroPregunta="numeroPregunta" :aciertos="aciertos" :totalPreguntas="TOTAL_PREGUNTAS" :racha="racha" :xp="xp" />            
             <TarjetaAve :foto="pregunta.correcta.foto" :atribucion="pregunta.correcta.atribucion" />
             <BotonOption v-for="opcion in pregunta.opciones" :key="opcion.id" 
                 :nombre="opcion.nombre" 
@@ -102,10 +114,12 @@ function reiniciar() {
                 :estado="estadoDe(opcion)"
                 :deshabilitado="elegida !== null"
                 @elegir="responder(opcion)" />
+
+            <MensajeResultado v-if="elegida !== null" :acerto="acerto" :nombreCorrecto="pregunta.correcta.nombre" />
             <button v-if="elegida !== null" @click="siguientePregunta">Siguiente</button>
         </div>
     </div>
 
 
-
+    
 </template>
