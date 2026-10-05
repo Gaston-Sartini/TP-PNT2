@@ -1,6 +1,9 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { obtenerAves } from '../servicios/avesService';
+import TarjetaAve from './TarjetaAve.vue';
+import BotonOption from './BotonOption.vue';
+import EstadoJuego from './EstadoJuego.vue';
 
 const aves = ref([]);
 const cargando = ref(false);
@@ -37,7 +40,43 @@ function nuevaPregunta() {
         correcta: elegidas[0], // La primera ave es la correcta
         opciones: mezclar(elegidas) // Mezclamos las opciones
     };
-    console.log('Nueva pregunta generada:', pregunta.value);
+    elegida.value = null; // Reiniciamos la respuesta elegida
+}
+
+const elegida = ref(null);
+function responder(opcion) {
+    elegida.value = opcion.id;
+    if (opcion.id === pregunta.value.correcta.id) {
+        aciertos.value++;
+    }
+}
+function estadoDe(opcion) {
+    if(elegida.value === null) return '';
+    if(opcion.id === pregunta.value.correcta.id) return 'correcta';
+    if(opcion.id === elegida.value) return 'incorrecta';
+    return '';
+}
+
+const TOTAL_PREGUNTAS = 10;
+const numeroPregunta = ref(1);
+const aciertos = ref(0);
+const terminada = ref(false);
+
+function siguientePregunta() {
+    if (numeroPregunta.value < TOTAL_PREGUNTAS) {
+        numeroPregunta.value++;
+        nuevaPregunta();
+    } else {
+        terminada.value = true;
+        partidaTerminada('partidaTerminada', { aciertos: aciertos.value, total: TOTAL_PREGUNTAS });
+    }
+}
+const partidaTerminada = defineEmits(['partidaTerminada']);
+function reiniciar() {
+    numeroPregunta.value = 1;
+    aciertos.value = 0;
+    terminada.value = false;
+    nuevaPregunta();
 }
 </script>
 
@@ -49,12 +88,21 @@ function nuevaPregunta() {
             <p>{{ error }}</p>
             <button @click="cargarAves">Reintentar</button>
         </div>
-        <div v-else-if="pregunta">            
-            <img :src="pregunta.correcta.foto" alt="Imagen del ave" class="imagen-ave" />
-            <button v-for="opcion in pregunta.opciones" :key="opcion.id">
-                {{ opcion.nombre }}
-            </button>
-            <button @click="nuevaPregunta">Otra Pregunta</button>
+        <div v-else-if="terminada">
+            <p>Partida terminada!</p>
+            <p>Aciertos: {{ aciertos }}</p>
+            <button @click="reiniciar">Reiniciar</button>
+        </div>
+        <div v-else-if="pregunta">
+            <EstadoJuego :numeroPregunta="numeroPregunta" :aciertos="aciertos" :totalPreguntas="TOTAL_PREGUNTAS" />            
+            <TarjetaAve :foto="pregunta.correcta.foto" :atribucion="pregunta.correcta.atribucion" />
+            <BotonOption v-for="opcion in pregunta.opciones" :key="opcion.id" 
+                :nombre="opcion.nombre" 
+                :nombreCientifico="opcion.nombreCientifico"
+                :estado="estadoDe(opcion)"
+                :deshabilitado="elegida !== null"
+                @elegir="responder(opcion)" />
+            <button v-if="elegida !== null" @click="siguientePregunta">Siguiente</button>
         </div>
     </div>
 

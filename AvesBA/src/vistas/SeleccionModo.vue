@@ -2,7 +2,9 @@
 import JuegoImagenes from '../components/JuegoImagenes.vue';
 import {ref} from 'vue';
 const modo = ref('');
-
+function mostrarResultado(event) {
+    console.log('Partida terminada con aciertos:', event.aciertos, 'de', event.total);
+}
 </script>
 
 <template>
@@ -21,7 +23,7 @@ const modo = ref('');
         <button type="button" class="boton-modo" @click="modo = 'ambas'" :class="{ activo: modo === 'ambas'}">Ambas</button>
       </div>
       <div class="area-juego">
-        <JuegoImagenes v-if="modo === 'imagen'" />
+        <JuegoImagenes v-if="modo === 'imagen'" @partida-terminada="mostrarResultado"/>
       </div>
     </div>
   </div>
