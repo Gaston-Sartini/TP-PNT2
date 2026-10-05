@@ -7,8 +7,8 @@
       <h1>Registro</h1>
       
       <input type="text" placeholder="Nombre de Usuario" class="campo" />
-      <input type="text" placeholder="Contraseña" class="campo" />
-      <label  type="etiqueta">Fecha de Nacimiento</label>
+      <input type="password" placeholder="Contraseña" class="campo" />
+      <label class="etiqueta">Fecha de Nacimiento</label>
       <input type="date" class="campo" />
       <input type="text" placeholder="Email" class="campo" />
       <button type="button" class="boton boton-principal">Registrar Jugador</button>
