@@ -1,0 +1,43 @@
+/* Estilos compartidos por toda la aplicación.
+   Se importan una sola vez en main.js. */
+
+:root {
+  --color-primario: #38bdf8;
+  --color-primario-suave: #e0f2fe;
+  --color-texto-suave: #64748b;
+
+  --color-exito: #16a34a;
+  --color-exito-fondo: #d1fae5;
+  --color-exito-texto: #065f46;
+
+  --color-error: #dc2626;
+  --color-error-fondo: #fee2e2;
+  --color-error-texto: #7f1d1d;
+
+  --radio: 8px;
+}
+
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+.boton {
+  padding: 0.5rem;
+  border: 1px solid var(--color-primario);
+  border-radius: var(--radio);
+  background: white;
+  cursor: pointer;
+  width: 100%;
+  font-family: inherit;
+}
+
+.boton-principal {
+  background: var(--color-primario);
+  color: white;
+  font-weight: bold;
+}
+
+.texto-suave {
+  font-size: 0.8rem;
+  color: var(--color-texto-suave);
+}

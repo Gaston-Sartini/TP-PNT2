@@ -93,17 +93,17 @@ function reiniciar() {
 
 <template>
     <div>
-        <h1>Aves BA</h1>
+        <h1 class="titulo">Aves BA</h1>
         <div v-if="cargando">Cargando aves...</div>
         <div v-else-if="error">
-            <p>{{ error }}</p>
-            <button @click="cargarAves">Reintentar</button>
+            <p class="error">{{ error }}</p>
+            <button class="boton boton-principal" @click="cargarAves">Reintentar</button>
         </div>
-        <div v-else-if="terminada">
+        <div v-else-if="terminada" class="final">
             <p>Partida terminada!</p>
             <p>Aciertos: {{ aciertos }}</p>
             <p>XP obtenida: {{ xp }}</p>            
-            <button @click="reiniciar">Reiniciar</button>
+            <button class="boton boton-principal" @click="reiniciar">Reiniciar</button>
         </div>
         <div v-else-if="pregunta">
             <EstadoJuego :numeroPregunta="numeroPregunta" :aciertos="aciertos" :totalPreguntas="TOTAL_PREGUNTAS" :racha="racha" :xp="xp" />            
@@ -116,10 +116,24 @@ function reiniciar() {
                 @elegir="responder(opcion)" />
 
             <MensajeResultado v-if="elegida !== null" :acerto="acerto" :nombreCorrecto="pregunta.correcta.nombre" />
-            <button v-if="elegida !== null" @click="siguientePregunta">Siguiente</button>
+            <button v-if="elegida !== null" class="boton boton-principal" @click="siguientePregunta">Siguiente</button>
         </div>
     </div>
-
-
-    
 </template>
+
+<style scoped>
+.titulo {
+    margin: 0 0 0.75rem;
+    font-size: 1.25rem;
+    text-align: center;
+}
+.error {
+    color: var(--color-error-texto);
+}
+.final {
+    text-align: center;
+}
+.boton-principal {
+    font-size: 1rem;
+}
+</style>

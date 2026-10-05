@@ -82,6 +82,7 @@ function mostrarResultado(event) {
   max-width: 400px;
   min-height: 250px;
   padding: 1rem;
+  box-sizing: border-box;
 }
 
 .activo {
