@@ -1,4 +1,4 @@
-<script setup>   
+<script setup>
 const props = defineProps({
     numeroPregunta: Number,
     aciertos: Number,
@@ -9,7 +9,7 @@ const props = defineProps({
 </script>
 
 <template>
-    <div>
+    <div class="estado">
         <p>Pregunta {{ numeroPregunta }} de {{ totalPreguntas }}</p>
         <p>Aciertos: {{ aciertos }}</p>
         <p>Racha: {{ racha }}</p>
@@ -18,5 +18,16 @@ const props = defineProps({
 </template>
 
 <style scoped>
-
+.estado {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.25rem 0.75rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+.estado p {
+    margin: 0;
+}
 </style>
