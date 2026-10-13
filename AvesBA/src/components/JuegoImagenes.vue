@@ -1,122 +1,155 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { obtenerAves } from '../servicios/avesService';
+import { ref, computed, onMounted } from 'vue';
+import { iniciarPartida, terminarPartida, obtenerPregunta, enviarRespuesta } from '../servicios/juegoService.js';
 import TarjetaAve from './TarjetaAve.vue';
 import BotonOption from './BotonOption.vue';
 import EstadoJuego from './EstadoJuego.vue';
 import MensajeResultado from './MensajeResultado.vue';
-import { computed } from 'vue';
 
-const aves = ref([]);
+const TOTAL_PREGUNTAS = 10;
+const MAX_INTENTOS_SIN_REPETIR = 10;
+const MAX_SESIONES_VIEJAS = 5;
+
+const emit = defineEmits(['partidaTerminada']);
+
+// Estado de la pantalla
 const cargando = ref(false);
 const error = ref('');
 
-async function cargarAves() {
-    cargando.value = true;
-    error.value = '';
-    try {
-        aves.value = await obtenerAves();
-        nuevaPregunta(); // Generamos una nueva pregunta después de cargar las aves
-    } catch (err) {
-        error.value = 'Error al cargar las aves: ' + err.message;
-    } finally {
-        cargando.value = false;
-    }    
-};
+// Estado de la partida
+const numeroPregunta = ref(1);
+const aciertos = ref(0);
+const racha = ref(0);
+const xp = ref(0);
+const terminada = ref(false);
+const vistas = ref([]); // ids de las aves que ya salieron en esta partida
+
+// Estado de la pregunta actual
+const pregunta = ref(null); // el ave que manda el backend, con sus 4 opciones
+const elegida = ref(null); // id de la opción que tocó el jugador
+const resultado = ref(null); // lo que responde el backend al validar
+
+const respondida = computed(() => resultado.value !== null);
 
 onMounted(() => {
-    cargarAves();
+    empezarPartida();
 });
 
-// Creamos una variable que genera una lista mezclada de aves para el juego
-function mezclar(lista){
-    return [...lista].sort(() => Math.random() - 0.5);
+async function empezarPartida() {
+    cargando.value = true;
+    error.value = '';
+    numeroPregunta.value = 1;
+    aciertos.value = 0;
+    racha.value = 0;
+    xp.value = 0;
+    terminada.value = false;
+    vistas.value = [];
+    try {
+        await cerrarSesionesViejas();
+        await iniciarPartida();
+        await cargarPregunta();
+    } catch (err) {
+        error.value = err.message;
+    } finally {
+        cargando.value = false;
+    }
 }
 
-const pregunta = ref(null);
-
-// Creamos una funcion para generar las preguntas.
-function nuevaPregunta() {
-    const elegidas = mezclar(aves.value).slice(0, 4); // Tomamos 4 aves al azar
-    pregunta.value = {
-        correcta: elegidas[0], // La primera ave es la correcta
-        opciones: mezclar(elegidas) // Mezclamos las opciones
-    };
-    elegida.value = null; // Reiniciamos la respuesta elegida
+// Si quedó una partida sin terminar, el backend seguiría anotando ahí las respuestas.
+async function cerrarSesionesViejas() {
+    for (let i = 0; i < MAX_SESIONES_VIEJAS; i++) {
+        try {
+            await terminarPartida();
+        } catch {
+            // No quedaba ninguna sesión abierta (o falló: lo informa iniciarPartida).
+            return;
+        }
+    }
 }
 
-const elegida = ref(null);
-function responder(opcion) {
-    elegida.value = opcion.id;
-    if (opcion.id === pregunta.value.correcta.id) {
+// El backend elige el ave al azar y puede repetirla: si ya salió, se pide otra.
+async function cargarPregunta() {
+    let nueva = await obtenerPregunta();
+    let intentos = 1;
+    while (vistas.value.includes(nueva.id) && intentos < MAX_INTENTOS_SIN_REPETIR) {
+        nueva = await obtenerPregunta();
+        intentos++;
+    }
+    vistas.value.push(nueva.id);
+    pregunta.value = nueva;
+    elegida.value = null;
+    resultado.value = null;
+}
+
+async function responder(opcion) {
+    elegida.value = opcion.id; // bloquea los botones mientras responde el backend
+    try {
+        resultado.value = await enviarRespuesta(pregunta.value, opcion);
+    } catch (err) {
+        error.value = err.message;
+        return;
+    }
+    if (resultado.value.es_correcta) {
         aciertos.value++;
         racha.value++;
-        xp.value += 10 + 5 * (racha.value - 1); // 10 XP base + 2 XP por cada acierto consecutivo
     } else {
         racha.value = 0;
     }
+    xp.value += resultado.value.puntos_obtenidos;
 }
+
 function estadoDe(opcion) {
-    if(elegida.value === null) return '';
-    if(opcion.id === pregunta.value.correcta.id) return 'correcta';
-    if(opcion.id === elegida.value) return 'incorrecta';
+    if (!respondida.value) return '';
+    if (opcion.id === pregunta.value.id) return 'correcta';
+    if (opcion.id === elegida.value) return 'incorrecta';
     return '';
 }
 
-const TOTAL_PREGUNTAS = 10;
-const numeroPregunta = ref(1);
-const aciertos = ref(0);
-const terminada = ref(false);
-const racha = ref(0);
-const xp = ref(0);
-const acerto = computed(() => elegida.value === pregunta.value.correcta.id);
-
-function siguientePregunta() {
-    if (numeroPregunta.value < TOTAL_PREGUNTAS) {
-        numeroPregunta.value++;
-        nuevaPregunta();
-    } else {
-        terminada.value = true;
-        partidaTerminada('partidaTerminada', { aciertos: aciertos.value, total: TOTAL_PREGUNTAS, xp: xp.value });
+async function siguientePregunta() {
+    cargando.value = true;
+    try {
+        if (numeroPregunta.value < TOTAL_PREGUNTAS) {
+            await cargarPregunta();
+            numeroPregunta.value++;
+        } else {
+            await terminarPartida();
+            terminada.value = true;
+            emit('partidaTerminada', { aciertos: aciertos.value, total: TOTAL_PREGUNTAS, xp: xp.value });
+        }
+    } catch (err) {
+        error.value = err.message;
+    } finally {
+        cargando.value = false;
     }
-}
-const partidaTerminada = defineEmits(['partidaTerminada']);
-function reiniciar() {
-    numeroPregunta.value = 1;
-    aciertos.value = 0;
-    terminada.value = false;
-    racha.value = 0;
-    xp.value = 0;
-    nuevaPregunta();
 }
 </script>
 
 <template>
     <div>
         <h1 class="titulo">Aves BA</h1>
-        <div v-if="cargando">Cargando aves...</div>
+        <div v-if="cargando">Cargando...</div>
         <div v-else-if="error">
             <p class="error">{{ error }}</p>
-            <button class="boton boton-principal" @click="cargarAves">Reintentar</button>
+            <button class="boton boton-principal" @click="empezarPartida">Reintentar</button>
         </div>
         <div v-else-if="terminada" class="final">
             <p>Partida terminada!</p>
             <p>Aciertos: {{ aciertos }}</p>
-            <p>XP obtenida: {{ xp }}</p>            
-            <button class="boton boton-principal" @click="reiniciar">Reiniciar</button>
+            <p>XP obtenida: {{ xp }}</p>
+            <button class="boton boton-principal" @click="empezarPartida">Reiniciar</button>
         </div>
         <div v-else-if="pregunta">
-            <EstadoJuego :numeroPregunta="numeroPregunta" :aciertos="aciertos" :totalPreguntas="TOTAL_PREGUNTAS" :racha="racha" :xp="xp" />            
-            <TarjetaAve :foto="pregunta.correcta.foto" :atribucion="pregunta.correcta.atribucion" />
-            <BotonOption v-for="opcion in pregunta.opciones" :key="opcion.id" 
-                :nombre="opcion.nombre" 
+            <EstadoJuego :numeroPregunta="numeroPregunta" :aciertos="aciertos" :totalPreguntas="TOTAL_PREGUNTAS" :racha="racha" :xp="xp" />
+            <TarjetaAve :foto="pregunta.foto" :atribucion="pregunta.atribucion" />
+            <BotonOption v-for="opcion in pregunta.opciones" :key="opcion.id"
+                :nombre="opcion.nombre"
                 :nombreCientifico="opcion.nombreCientifico"
                 :estado="estadoDe(opcion)"
                 :deshabilitado="elegida !== null"
                 @elegir="responder(opcion)" />
 
-            <MensajeResultado v-if="elegida !== null" :acerto="acerto" :nombreCorrecto="pregunta.correcta.nombre" />
-            <button v-if="elegida !== null" class="boton boton-principal" @click="siguientePregunta">Siguiente</button>
+            <MensajeResultado v-if="respondida" :acerto="resultado.es_correcta" :nombreCorrecto="pregunta.nombre" />
+            <button v-if="respondida" class="boton boton-principal" @click="siguientePregunta">Siguiente</button>
         </div>
     </div>
 </template>
