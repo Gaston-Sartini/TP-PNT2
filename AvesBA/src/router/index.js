@@ -6,6 +6,7 @@ import JugarGrupo from '../vistas/JugarGrupo.vue'
 import DatosJugador from '../vistas/DatosJugador.vue'
 import Ranking from '../vistas/Ranking.vue'
 import Metricas from '../vistas/Metricas.vue'
+import PerfilEjemplo from '../vistas/PerfilEjemplo.vue'
 
 const routes = [
   { path: '/', component: Login },
@@ -15,6 +16,7 @@ const routes = [
   { path: '/datos-jugador', component: DatosJugador },
   { path: '/ranking', component: Ranking },
   { path: '/metricas', component: Metricas },
+  { path: '/perfil', component: PerfilEjemplo },
 ]
 
 const router = createRouter({

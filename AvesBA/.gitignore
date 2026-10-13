@@ -37,3 +37,8 @@ __screenshots__/
 
 # Vite
 *.timestamp-*-*.mjs
+
+# Environment variables (no subir archivos .env locales)
+.env
+.env.local
+.env.*.local
