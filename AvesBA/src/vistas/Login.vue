@@ -1,12 +1,42 @@
-<script setup></script>
+<script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { login } from '../servicios/authService.js';
+
+const router = useRouter();
+const email = ref('');
+const password = ref('');
+const error = ref('');
+const cargando = ref(false);
+
+async function ingresar() {
+  if (!email.value || !password.value) {
+    error.value = 'Completá el email y la contraseña.';
+    return;
+  }
+  cargando.value = true;
+  error.value = '';
+  try {
+    await login(email.value, password.value);
+    router.push('/modo');
+  } catch (err) {
+    error.value = err.message;
+  } finally {
+    cargando.value = false;
+  }
+}
+</script>
 
 <template>
   <div class="pantalla">
     <div class="tarjeta">
       <h1>Login</h1>
-      <input type="text" placeholder="Usuario" class="campo" />
-      <input type="password" placeholder="Contraseña" class="campo" />
-      <button type="button" class="boton boton-principal">Login</button>
+      <input v-model="email" type="email" placeholder="Email" class="campo" @keyup.enter="ingresar" />
+      <input v-model="password" type="password" placeholder="Contraseña" class="campo" @keyup.enter="ingresar" />
+      <p v-if="error" class="error">{{ error }}</p>
+      <button type="button" class="boton boton-principal" :disabled="cargando" @click="ingresar">
+        {{ cargando ? 'Ingresando...' : 'Login' }}
+      </button>
       <router-link to="/registro">
         <button type="button" class="boton">Registrar</button>
       </router-link>
@@ -57,6 +87,12 @@
   background: #38bdf8;
   color: white;
   font-weight: bold;
+}
+
+.error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-error-texto);
 }
 
 .nota {
