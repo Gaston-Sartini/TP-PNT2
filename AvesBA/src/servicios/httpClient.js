@@ -35,8 +35,11 @@ async function hacerRequest(endpoint, opciones = {}) {
     // Manejar errores HTTP
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      // El backend manda "detail" como texto, o como lista cuando los datos son inválidos (422)
+      const detalle = errorData.detail;
+      const mensaje = typeof detalle === 'string' ? detalle : detalle?.[0]?.msg;
       throw new Error(
-        errorData.detail?.[0]?.msg ||
+        mensaje ||
         errorData.mensaje ||
         `Error ${response.status}: ${response.statusText}`
       );
