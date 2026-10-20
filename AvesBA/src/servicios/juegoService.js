@@ -10,9 +10,9 @@ export async function terminarPartida() {
     return await http.post(`${BASE}/terminar`);
 }
 
-export async function obtenerPregunta() {
+export async function obtenerPreguntas() {
     const respuesta = await http.get(`${BASE}/aves`);
-    return respuesta.ave;
+    return respuesta.preguntas;
 }
 
 export async function enviarRespuesta(ave, opcion)  {

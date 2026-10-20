@@ -1,15 +1,15 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { iniciarPartida, terminarPartida, obtenerPregunta, enviarRespuesta } from '../servicios/juegoService.js';
+import { iniciarPartida, terminarPartida, obtenerPreguntas, enviarRespuesta } from '../servicios/juegoService.js';
 import TarjetaAve from './TarjetaAve.vue';
 import BotonOption from './BotonOption.vue';
 import EstadoJuego from './EstadoJuego.vue';
 import MensajeResultado from './MensajeResultado.vue';
+import { calcularPuntos } from '@/juego/puntaje.js';
 
 const TOTAL_PREGUNTAS = 10;
-const MAX_INTENTOS_SIN_REPETIR = 10;
 const MAX_SESIONES_VIEJAS = 5;
-
+const preguntas = ref([]);
 const emit = defineEmits(['partidaTerminada']);
 
 // Estado de la pantalla
@@ -22,14 +22,13 @@ const aciertos = ref(0);
 const racha = ref(0);
 const xp = ref(0);
 const terminada = ref(false);
-const vistas = ref([]); // ids de las aves que ya salieron en esta partida
 
 // Estado de la pregunta actual
-const pregunta = ref(null); // el ave que manda el backend, con sus 4 opciones
+const pregunta = computed(() => preguntas.value[numeroPregunta.value - 1] ?? null);
 const elegida = ref(null); // id de la opción que tocó el jugador
-const resultado = ref(null); // lo que responde el backend al validar
+const acerto = computed(() => elegida.value === pregunta.value?.id);
 
-const respondida = computed(() => resultado.value !== null);
+const respondida = computed(() => elegida.value !== null);
 
 onMounted(() => {
     empezarPartida();
@@ -37,17 +36,18 @@ onMounted(() => {
 
 async function empezarPartida() {
     cargando.value = true;
+    elegida.value = null;
     error.value = '';
     numeroPregunta.value = 1;
     aciertos.value = 0;
     racha.value = 0;
     xp.value = 0;
     terminada.value = false;
-    vistas.value = [];
+    preguntas.value = [];
     try {
         await cerrarSesionesViejas();
         await iniciarPartida();
-        await cargarPregunta();
+        preguntas.value = await obtenerPreguntas();
     } catch (err) {
         error.value = err.message;
     } finally {
@@ -67,35 +67,21 @@ async function cerrarSesionesViejas() {
     }
 }
 
-// El backend elige el ave al azar y puede repetirla: si ya salió, se pide otra.
-async function cargarPregunta() {
-    let nueva = await obtenerPregunta();
-    let intentos = 1;
-    while (vistas.value.includes(nueva.id) && intentos < MAX_INTENTOS_SIN_REPETIR) {
-        nueva = await obtenerPregunta();
-        intentos++;
-    }
-    vistas.value.push(nueva.id);
-    pregunta.value = nueva;
-    elegida.value = null;
-    resultado.value = null;
-}
-
 async function responder(opcion) {
-    elegida.value = opcion.id; // bloquea los botones mientras responde el backend
-    try {
-        resultado.value = await enviarRespuesta(pregunta.value, opcion);
-    } catch (err) {
-        error.value = err.message;
-        return;
-    }
-    if (resultado.value.es_correcta) {
+    elegida.value = opcion.id;
+    if(acerto.value){
         aciertos.value++;
         racha.value++;
     } else {
         racha.value = 0;
     }
-    xp.value += resultado.value.puntos_obtenidos;
+    xp.value += calcularPuntos(acerto.value, racha.value);
+    try {
+        await enviarRespuesta(pregunta.value, opcion);
+    } catch (err) {
+        error.value = err.message;
+        return;
+    }
 }
 
 function estadoDe(opcion) {
@@ -106,16 +92,18 @@ function estadoDe(opcion) {
 }
 
 async function siguientePregunta() {
+    if (numeroPregunta.value < TOTAL_PREGUNTAS) {
+        numeroPregunta.value++;
+        elegida.value = null;
+        return;
+    } 
+
     cargando.value = true;
+    
     try {
-        if (numeroPregunta.value < TOTAL_PREGUNTAS) {
-            await cargarPregunta();
-            numeroPregunta.value++;
-        } else {
-            await terminarPartida();
-            terminada.value = true;
-            emit('partidaTerminada', { aciertos: aciertos.value, total: TOTAL_PREGUNTAS, xp: xp.value });
-        }
+        await terminarPartida();
+        terminada.value = true;
+        emit('partidaTerminada', { aciertos: aciertos.value, total: TOTAL_PREGUNTAS, xp: xp.value });        
     } catch (err) {
         error.value = err.message;
     } finally {
@@ -148,7 +136,7 @@ async function siguientePregunta() {
                 :deshabilitado="elegida !== null"
                 @elegir="responder(opcion)" />
 
-            <MensajeResultado v-if="respondida" :acerto="resultado.es_correcta" :nombreCorrecto="pregunta.nombre" />
+            <MensajeResultado v-if="respondida" :acerto="acerto" :nombreCorrecto="pregunta.nombre" />
             <button v-if="respondida" class="boton boton-principal" @click="siguientePregunta">Siguiente</button>
         </div>
     </div>
