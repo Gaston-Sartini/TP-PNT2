@@ -1,9 +1,19 @@
 <script setup>
 import JuegoImagenes from '../components/JuegoImagenes.vue';
 import {ref} from 'vue';
+import { useRouter } from 'vue-router';
+import { logout } from '../servicios/authService.js';
+
 const modo = ref('');
+const router = useRouter();
+
 function mostrarResultado(event) {
     console.log('Partida terminada con aciertos:', event.aciertos, 'de', event.total, 'y XP:', event.xp);
+}
+
+async function cerrarSesion() {
+  await logout();
+  router.push('/');
 }
 </script>
 
@@ -15,6 +25,7 @@ function mostrarResultado(event) {
       <router-link to="/datos-jugador" class="boton-nav">Datos del Jugador</router-link>
       <router-link to="/ranking" class="boton-nav">Ranking</router-link>
       <router-link to="/metricas" class="boton-nav">Métricas</router-link>
+      <button type="button" class="boton-nav" @click="cerrarSesion">Cerrar Sesión</button>
     </nav>
     <div class="contenido">
       <div class="modos">
