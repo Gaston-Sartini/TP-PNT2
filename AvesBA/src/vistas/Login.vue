@@ -29,10 +29,10 @@ async function ingresar() {
 </script>
 
 <template>
-  <!-- Página de inicio: la imagen del paisaje de fondo (clase av-fondo-paisaje,
-       en estilos/base.css) y la tarjeta de ingreso encima.
-       hero / hero-body / is-fullheight: clases de Bulma para ocupar toda la pantalla. -->
   <section class="hero is-fullheight av-fondo-paisaje">
+    <!-- Página de inicio: la imagen del paisaje de fondo (clase av-fondo-paisaje,
+         en estilos/base.css) y la tarjeta de ingreso encima.
+         hero / hero-body / is-fullheight: clases de Bulma para ocupar toda la pantalla. -->
     <div class="hero-body">
       <div class="av-columna">
         <!-- Presentación del juego, sobre la foto -->

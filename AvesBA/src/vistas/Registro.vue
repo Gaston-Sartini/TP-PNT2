@@ -1,9 +1,9 @@
 <script setup></script>
 
 <template>
-  <!-- Misma estructura visual que el Login: foto de fondo + tarjeta de vidrio.
-       Los campos todavía no están conectados al backend. -->
   <section class="hero is-fullheight av-fondo-paisaje">
+    <!-- Misma estructura visual que el Login: foto de fondo + tarjeta de vidrio.
+         Los campos todavía no están conectados al backend. -->
     <div class="hero-body">
       <div class="av-columna">
         <div class="box av-vidrio av-tarjeta">
