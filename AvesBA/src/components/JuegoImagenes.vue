@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { iniciarPartida, terminarPartida, obtenerPreguntas, enviarRespuesta } from '../servicios/juegoService.js';
+import { iniciarPartida, terminarPartida, obtenerPreguntas, enviarRespuesta, obtenerSesionActiva } from '../servicios/juegoService.js';
 import TarjetaAve from './TarjetaAve.vue';
 import BotonOption from './BotonOption.vue';
 import EstadoJuego from './EstadoJuego.vue';
@@ -8,7 +8,6 @@ import MensajeResultado from './MensajeResultado.vue';
 import { calcularPuntos } from '@/juego/puntaje.js';
 
 const TOTAL_PREGUNTAS = 10;
-const MAX_SESIONES_VIEJAS = 5;
 const preguntas = ref([]);
 const emit = defineEmits(['partidaTerminada']);
 
@@ -31,23 +30,18 @@ const acerto = computed(() => elegida.value === pregunta.value?.id);
 const respondida = computed(() => elegida.value !== null);
 
 onMounted(() => {
-    empezarPartida();
+    cargarPartida();
 });
 
-async function empezarPartida() {
+async function cargarPartida() {
     cargando.value = true;
-    elegida.value = null;
     error.value = '';
-    numeroPregunta.value = 1;
-    aciertos.value = 0;
-    racha.value = 0;
-    xp.value = 0;
-    terminada.value = false;
-    preguntas.value = [];
     try {
-        await cerrarSesionesViejas();
-        await iniciarPartida();
-        preguntas.value = await obtenerPreguntas();
+        const sesion = await obtenerSesionActiva();
+        if(sesion && sesion.preguntas.length > 0) {
+            return await retomarPartida(sesion);
+        }
+        return await empezarPartida();
     } catch (err) {
         error.value = err.message;
     } finally {
@@ -55,17 +49,37 @@ async function empezarPartida() {
     }
 }
 
-// Si quedó una partida sin terminar, el backend seguiría anotando ahí las respuestas.
-async function cerrarSesionesViejas() {
-    for (let i = 0; i < MAX_SESIONES_VIEJAS; i++) {
-        try {
-            await terminarPartida();
-        } catch {
-            // No quedaba ninguna sesión abierta (o falló: lo informa iniciarPartida).
-            return;
-        }
+function reiniciarEstado() {    
+    elegida.value = null;
+    numeroPregunta.value = 1;
+    aciertos.value = 0;
+    racha.value = 0;
+    xp.value = 0;
+    terminada.value = false;
+    preguntas.value = [];
+}
+
+async function retomarPartida(sesion) {
+    reiniciarEstado();
+    preguntas.value = sesion.preguntas;
+    aciertos.value = sesion.respuestas.filter(r => r.es_correcta).length;
+    racha.value = sesion.streak_actual;
+    xp.value = sesion.puntos_totales;
+    
+    if (sesion.respuestas.length >= preguntas.value.length) {
+        await terminarPartida();
+        terminada.value = true;
+    } else {
+        numeroPregunta.value = sesion.respuestas.length + 1;
     }
 }
+
+async function empezarPartida() {
+    reiniciarEstado();
+    await iniciarPartida();
+    preguntas.value = await obtenerPreguntas();
+}
+
 
 async function responder(opcion) {
     elegida.value = opcion.id;
@@ -118,13 +132,13 @@ async function siguientePregunta() {
         <div v-if="cargando">Cargando...</div>
         <div v-else-if="error">
             <p class="error">{{ error }}</p>
-            <button class="boton boton-principal" @click="empezarPartida">Reintentar</button>
+            <button class="boton boton-principal" @click="cargarPartida">Reintentar</button>
         </div>
         <div v-else-if="terminada" class="final">
             <p>Partida terminada!</p>
             <p>Aciertos: {{ aciertos }}</p>
             <p>XP obtenida: {{ xp }}</p>
-            <button class="boton boton-principal" @click="empezarPartida">Reiniciar</button>
+            <button class="boton boton-principal" @click="cargarPartida">Reiniciar</button>
         </div>
         <div v-else-if="pregunta">
             <EstadoJuego :numeroPregunta="numeroPregunta" :aciertos="aciertos" :totalPreguntas="TOTAL_PREGUNTAS" :racha="racha" :xp="xp" />
