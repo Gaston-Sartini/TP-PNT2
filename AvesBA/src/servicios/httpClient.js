@@ -72,4 +72,4 @@ const http = {
     hacerRequest(endpoint, { ...opciones, metodo: 'DELETE' }),
 };
 
-export { http };
+export { http, API_BASE_URL };

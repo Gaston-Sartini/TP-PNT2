@@ -1,9 +1,10 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { login } from '../servicios/authService.js';
+import { useAuthStore } from '../stores/auth.js';
 
 const router = useRouter();
+const authStore = useAuthStore();
 const email = ref('');
 const password = ref('');
 const error = ref('');
@@ -17,7 +18,7 @@ async function ingresar() {
   cargando.value = true;
   error.value = '';
   try {
-    await login(email.value, password.value);
+    await authStore.login(email.value, password.value);
     router.push('/modo');
   } catch (err) {
     error.value = err.message;
