@@ -1,0 +1,90 @@
+/* ==========================================================================
+   TEMA: la paleta de colores de toda la app
+   --------------------------------------------------------------------------
+   De dónde salen los colores: están medidos sobre la imagen
+   src/assets/imagenes/hero-background.webp (follaje, cartel de madera,
+   cielo, lago, atardecer).
+
+   Este archivo hace dos cosas:
+   1) Define NUESTRAS variables (--color-...). Los componentes las usan con
+      var(--color-...). Si cambiás un color acá, cambia en toda la app.
+   2) Le pasa esos colores a BULMA. Bulma arma cada color con tres
+      variables: tono (-h), saturación (-s) y luminosidad (-l). Al pisarlas,
+      las clases de Bulma como "is-primary" o "is-success" usan nuestra
+      paleta en lugar de la suya.
+
+   Se carga en main.js DESPUÉS de Bulma, para que estos valores ganen.
+   ========================================================================== */
+
+:root {
+  /* ---- 1) Nuestra paleta ---------------------------------------------- */
+  --color-bosque: #3a4626;      /* follaje oscuro: textos fuertes, menú      */
+  --color-musgo: #5b6a38;       /* color principal: botones, barra de avance */
+  --color-salvia: #869266;      /* carteles verdes de la imagen: detalles    */
+  --color-cielo: #a5cddc;       /* cielo: fondos suaves                       */
+  --color-agua: #4f7f86;        /* lago: links e información                  */
+  --color-madera: #7b5725;      /* cartel de madera: bordes y marcos          */
+  --color-dorado: #d9a441;      /* luz del atardecer: XP y premios            */
+  --color-crema: #f4efdc;       /* pergamino: fondo general de la página      */
+  --color-hoja: #4f8a3c;        /* verde vivo: respuesta correcta             */
+  --color-terracota: #b5462f;   /* puente de hierro: respuesta incorrecta     */
+
+  --color-texto: #26301a;       /* texto general (verde casi negro)           */
+  --color-texto-suave: #5f6650; /* textos secundarios: atribuciones, ayudas   */
+
+  /* Sombra y bordes redondeados propios */
+  --sombra-suave: 0 6px 18px rgba(38, 48, 26, 0.12);
+  --sombra-fuerte: 0 12px 28px rgba(38, 48, 26, 0.22);
+  --radio: 0.75rem;
+
+  /* Tipografías (se cargan desde Google Fonts en index.html) */
+  --fuente-texto: 'Nunito', system-ui, sans-serif;
+  --fuente-titulos: 'Fredoka', 'Nunito', system-ui, sans-serif;
+
+  /* ---- 2) Los mismos colores, traducidos a las variables de Bulma ------ */
+  /* primary = musgo -> .button.is-primary, .progress.is-primary, etc.   */
+  --bulma-primary-h: 78deg;
+  --bulma-primary-s: 31%;
+  --bulma-primary-l: 32%;
+  --bulma-primary-invert-l: 100%;     /* texto blanco sobre el verde          */
+  --bulma-primary-on-scheme-l: 28%;   /* cuando el verde se usa como texto    */
+
+  /* success = hoja -> is-success (respuesta correcta)                      */
+  --bulma-success-h: 105deg;
+  --bulma-success-s: 39%;
+  --bulma-success-l: 34%;
+  --bulma-success-invert-l: 100%;
+  --bulma-success-on-scheme-l: 30%;
+
+  /* danger = terracota -> is-danger (respuesta incorrecta, errores)        */
+  --bulma-danger-h: 10deg;
+  --bulma-danger-s: 59%;
+  --bulma-danger-l: 45%;
+  --bulma-danger-invert-l: 100%;
+  --bulma-danger-on-scheme-l: 40%;
+
+  /* warning = dorado -> is-warning (XP, racha, premios). Texto oscuro     */
+  --bulma-warning-h: 39deg;
+  --bulma-warning-s: 67%;
+  --bulma-warning-l: 55%;
+  --bulma-warning-on-scheme-l: 30%;
+
+  /* info y link = agua -> is-info, y el color de los <a>                   */
+  --bulma-info-h: 188deg;
+  --bulma-info-s: 26%;
+  --bulma-info-l: 38%;
+  --bulma-info-invert-l: 100%;
+  --bulma-info-on-scheme-l: 32%;
+  --bulma-link-h: 188deg;
+  --bulma-link-s: 26%;
+  --bulma-link-l: 38%;
+  --bulma-link-on-scheme-l: 32%;
+
+  /* Fondo, tipografía y bordes que usa Bulma en todos sus componentes      */
+  --bulma-body-background-color: var(--color-crema);
+  --bulma-body-color: var(--color-texto);
+  --bulma-family-primary: var(--fuente-texto);
+  --bulma-radius: 0.6rem;
+  --bulma-radius-medium: 0.75rem;
+  --bulma-radius-large: 1rem;
+}

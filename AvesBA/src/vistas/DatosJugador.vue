@@ -9,16 +9,56 @@ onMounted(() => {
 });
 </script>
 
-// Componente para mostrar los datos del jugador.
+<!-- Componente para mostrar los datos del jugador. -->
 <template>
-  <div>
-    <h1>Datos del Jugador</h1>
-    <p v-if="authStore.cargando">Cargando...</p>
-    <p v-else-if="authStore.error" class="error">{{ authStore.error }}</p>
-    <div v-else>
-      <p><strong>Nombre:</strong> {{ authStore.nombreCompleto }}</p>
-      <p><strong>Email:</strong> {{ authStore.jugador.email }}</p>
-      <p><strong>Rol:</strong> {{ authStore.jugador.role }}</p>
+  <div class="box av-ficha">
+    <h1 class="title is-3">Datos del jugador</h1>
+
+    <progress v-if="authStore.cargando" class="progress is-small is-primary" max="100"></progress>
+    <p v-else-if="authStore.error" class="notification is-danger is-light">{{ authStore.error }}</p>
+
+    <!-- media / media-left / media-content: Bulma, para poner el avatar al lado de los datos -->
+    <div v-else-if="authStore.jugador" class="media">
+      <div class="media-left">
+        <p class="av-avatar">{{ authStore.jugador.nombre?.charAt(0) }}</p>
+      </div>
+      <div class="media-content">
+        <p class="title is-4 mb-2">{{ authStore.nombreCompleto }}</p>
+        <p class="mb-3 av-email">{{ authStore.jugador.email }}</p>
+        <span class="tag is-primary is-light is-medium">Rol: {{ authStore.jugador.role }}</span>
+      </div>
     </div>
+    <!-- Si no hay jugador cargado (por ejemplo, justo después de cerrar sesión) -->
+    <p v-else class="notification is-info is-light">No hay datos del jugador.</p>
   </div>
 </template>
+
+<style scoped>
+/* De dónde sale cada estilo:
+   - box, title, media, tag, progress, notification: Bulma.
+   - Colores: estilos/tema.css. Lo de abajo es solo de esta pantalla. */
+
+.av-ficha {
+  max-width: 560px;
+}
+
+/* Emails largos: que corten de línea en vez de desbordar */
+.av-email {
+  overflow-wrap: anywhere;
+}
+
+/* Círculo con la inicial del jugador */
+.av-avatar {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-musgo);
+  color: white;
+  font-family: var(--fuente-titulos);
+  font-size: 2rem;
+  border: 3px solid var(--color-dorado);
+}
+</style>

@@ -1,105 +1,79 @@
 <script setup>
 import JuegoImagenes from '../components/JuegoImagenes.vue';
-import {ref} from 'vue';
-import { useRouter } from 'vue-router'; // sirve para ingresar al desde el codigo a la ruta de la pagina, es decir, para poder redirigir a otra pagina desde el codigo.
-import { useAuthStore } from '../stores/auth';
+import { ref } from 'vue';
 
+// El menú lateral y "Cerrar sesión" pasaron a components/LayoutPrincipal.vue,
+// que envuelve a todas las pantallas internas.
 const modo = ref('');
-const router = useRouter();
-const authStore = useAuthStore();
 
 function mostrarResultado(event) {
     console.log('Partida terminada con aciertos:', event.aciertos, 'de', event.total, 'y XP:', event.xp);
 }
-
-//le pega al backend para invalidar la sesión del lado del servidor
-async function cerrarSesion() {
-  await authStore.cerrarSesion();
-  router.push('/');
-}
 </script>
 
 <template>
-  <div class="contenedor">
-    <nav class="barra-lateral">
-      <router-link to="/modo" class="boton-nav">Jugar Individual</router-link>
-      <router-link to="/grupo" class="boton-nav">Jugar en Grupo</router-link>
-      <router-link to="/datos-jugador" class="boton-nav">Datos del Jugador</router-link>
-      <router-link to="/ranking" class="boton-nav">Ranking</router-link>
-      <router-link to="/metricas" class="boton-nav">Métricas</router-link>
-      <button type="button" class="boton-nav" @click="cerrarSesion">Cerrar Sesión</button> 
-    </nav>
-    <div class="contenido">
-      <div class="modos">
-        <button type="button" class="boton-modo" @click="modo = 'imagen'" :class="{ activo: modo === 'imagen'}">Solo Imagen</button>
-        <button type="button" class="boton-modo" @click="modo = 'audio'" :class="{ activo: modo === 'audio'}">Solo Audios</button>
-        <button type="button" class="boton-modo" @click="modo = 'ambas'" :class="{ activo: modo === 'ambas'}">Ambas</button>
-      </div>
-      <div class="area-juego">
-        <JuegoImagenes v-if="modo === 'imagen'" @partida-terminada="mostrarResultado"/>
-      </div>
+  <div>
+    <!-- Cartel de bienvenida con la foto del paisaje (av-fondo-paisaje: estilos/base.css) -->
+    <div class="av-cartel av-fondo-paisaje mb-5">
+      <h1 class="title is-3 av-cartel-titulo">¿Cómo querés jugar?</h1>
+      <p class="av-cartel-texto">Elegí un modo y adiviná qué ave aparece en cada foto.</p>
     </div>
+
+    <!-- Selector de modo. buttons / button / is-*: Bulma.
+         El modo elegido se pinta con is-primary; los demás con is-light. -->
+    <div class="buttons is-centered mb-5">
+      <button type="button" class="button is-medium av-elevable"
+        :class="modo === 'imagen' ? 'is-primary' : 'is-light'" @click="modo = 'imagen'">
+        📷 Solo imagen
+      </button>
+      <button type="button" class="button is-medium av-elevable"
+        :class="modo === 'audio' ? 'is-primary' : 'is-light'" @click="modo = 'audio'">
+        🔊 Solo audio
+      </button>
+      <button type="button" class="button is-medium av-elevable"
+        :class="modo === 'ambas' ? 'is-primary' : 'is-light'" @click="modo = 'ambas'">
+        🎲 Ambas
+      </button>
+    </div>
+
+    <!-- Área de juego: tarjeta blanca centrada (box: Bulma) -->
+    <Transition name="aparecer" mode="out-in">
+      <div v-if="modo === 'imagen'" key="imagen" class="box av-area-juego">
+        <JuegoImagenes @partida-terminada="mostrarResultado" />
+      </div>
+      <div v-else-if="modo" key="pronto" class="notification is-info is-light av-area-juego has-text-centered">
+        🛠️ Este modo todavía está en construcción. ¡Muy pronto!
+      </div>
+    </Transition>
   </div>
 </template>
 
 <style scoped>
-.contenedor {
-  display: flex;
-  gap: 1.5rem;
-  padding: 1.5rem;
-}
+/* De dónde sale cada estilo:
+   - Botones, box, notification: clases de Bulma del template.
+   - Foto del cartel: av-fondo-paisaje (estilos/base.css).
+   - Transición "aparecer": estilos/animaciones.css.
+   - Lo de abajo es solo de esta pantalla. */
 
-.barra-lateral {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  width: 180px;
-}
-
-.boton-nav {
-  padding: 0.5rem;
-  border: 1px solid #38bdf8;
-  border-radius: 8px;
+.av-cartel {
+  border-radius: var(--radio);
+  padding: 2rem 1.5rem;
   text-align: center;
-  text-decoration: none;
-  color: inherit;
+  box-shadow: var(--sombra-suave);
+}
+.av-cartel-titulo {
+  color: var(--color-crema);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+.av-cartel-texto {
+  color: var(--color-crema);
+  font-weight: 600;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
-.boton-nav.router-link-active {
-  background: #38bdf8;
-  color: white;
-}
-
-.contenido {
-  flex: 1;
-}
-
-.modos {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.boton-modo {
-  padding: 0.5rem 1rem;
-  border: 1px solid #38bdf8;
-  border-radius: 8px;
-  background: white;
-  cursor: pointer;
-}
-
-.area-juego {
-  border: 1px solid #38bdf8;
-  border-radius: 12px;
-  width: 100%;
-  max-width: 400px;
-  min-height: 250px;
-  padding: 1rem;
-  box-sizing: border-box;
-}
-
-.activo {
-  background: #38bdf8;
-  color: white;
+/* El juego se ve como una tarjeta angosta y centrada */
+.av-area-juego {
+  max-width: 560px;
+  margin: 0 auto;
 }
 </style>

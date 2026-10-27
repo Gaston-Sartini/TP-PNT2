@@ -1,8 +1,9 @@
 <script setup></script>
 
 <template>
-  <div>
-    <h1>Ranking</h1>
-    <p>Aca iria el ranking de los jugadores.</p>
+  <div class="box">
+    <!-- box, title, notification: Bulma -->
+    <h1 class="title is-3">Ranking</h1>
+    <p class="notification is-info is-light">🛠️ Esta sección está en construcción.</p>
   </div>
 </template>
