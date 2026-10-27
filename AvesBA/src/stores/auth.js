@@ -1,11 +1,12 @@
 import { defineStore } from 'pinia'
-import { obtenerPerfil, logout } from '../servicios/authService.js'
+import { login as loginService, obtenerPerfil, logout } from '../servicios/authService.js'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     jugador: null,
     cargando: true,
-    error: ''
+    error: '',
+    horaIngreso: null
   }),
   getters: {
     estaLogueado: (state) => state.jugador !== null,
@@ -26,6 +27,10 @@ export const useAuthStore = defineStore('auth', {
     async cerrarSesion() {
       await logout()
       this.jugador = null
+    },    
+    async login(email, password) {
+      await loginService(email, password)
+      this.horaIngreso = Date.now()
     }
   }
 })
