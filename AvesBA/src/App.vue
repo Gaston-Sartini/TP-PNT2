@@ -1,8 +1,11 @@
 <script setup>
 import { onUnmounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { useAuthStore } from './stores/auth.js'
 import { API_BASE_URL } from './servicios/httpClient.js'
+import LayoutPrincipal from './components/LayoutPrincipal.vue'
 
+const route = useRoute()
 const authStore = useAuthStore()
 
 const handleWindowClose = () => {
@@ -25,10 +28,20 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <nav>
-    <router-link to="/">Login</router-link> |
-    <router-link to="/registro">Registro</router-link> |
-    <router-link to="/modo">Selección de modo</router-link>
-  </nav>
-  <router-view />
+  <!-- Pantallas internas (las que tienen meta.conMenu en el router): van dentro del layout.
+       <Transition name="pagina"> anima el cambio de pantalla (ver estilos/animaciones.css). -->
+  <LayoutPrincipal v-if="route.meta.conMenu">
+    <router-view v-slot="{ Component }">
+      <Transition name="pagina" mode="out-in">
+        <component :is="Component" />
+      </Transition>
+    </router-view>
+  </LayoutPrincipal>
+
+  <!-- Login y Registro: pantalla completa, sin menú -->
+  <router-view v-else v-slot="{ Component }">
+    <Transition name="pagina" mode="out-in">
+      <component :is="Component" />
+    </Transition>
+  </router-view>
 </template>

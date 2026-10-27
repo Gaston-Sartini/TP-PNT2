@@ -8,14 +8,16 @@ import Ranking from '../vistas/Ranking.vue'
 import Metricas from '../vistas/Metricas.vue'
 // import PerfilEjemplo from '../vistas/PerfilEjemplo.vue'
 
+// meta: { conMenu: true } -> la pantalla se muestra dentro de LayoutPrincipal
+// (barra superior + menú lateral). Ver App.vue.
 const routes = [
   { path: '/', component: Login },
   { path: '/registro', component: Registro },
-  { path: '/modo', component: SeleccionModo },
-  { path: '/grupo', component: JugarGrupo },
-  { path: '/datos-jugador', component: DatosJugador },
-  { path: '/ranking', component: Ranking },
-  { path: '/metricas', component: Metricas },
+  { path: '/modo', component: SeleccionModo, meta: { conMenu: true } },
+  { path: '/grupo', component: JugarGrupo, meta: { conMenu: true } },
+  { path: '/datos-jugador', component: DatosJugador, meta: { conMenu: true } },
+  { path: '/ranking', component: Ranking, meta: { conMenu: true } },
+  { path: '/metricas', component: Metricas, meta: { conMenu: true } },
   //{ path: '/perfil', component: PerfilEjemplo },
 ]
 

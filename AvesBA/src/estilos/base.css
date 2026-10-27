@@ -1,0 +1,50 @@
+/* ==========================================================================
+   BASE: estilos generales y clases propias reutilizables
+   --------------------------------------------------------------------------
+   Todo lo que está acá aplica en cualquier pantalla. Los colores salen de
+   tema.css (var(--color-...)). Las clases de este archivo empiezan con
+   "av-" (de Aves) para distinguirlas a simple vista de las de Bulma, que
+   empiezan con "is-", "has-" o son nombres como "box", "button", "tag".
+   ========================================================================== */
+
+/* Títulos con la tipografía "de juego" (Fredoka). Bulma usa .title */
+h1, h2, h3,
+.title,
+.subtitle {
+  font-family: var(--fuente-titulos);
+  color: var(--color-bosque);
+}
+
+/* Fondo con la imagen del paisaje.
+   Se usa en Login, Registro y en el cartel de bienvenida.
+   La capa de color de arriba (linear-gradient) oscurece la foto para que
+   el texto se lea bien. */
+.av-fondo-paisaje {
+  background-image:
+    linear-gradient(rgba(38, 48, 26, 0.35), rgba(38, 48, 26, 0.55)),
+    url('../assets/imagenes/hero-background.webp');
+  background-size: cover;
+  background-position: center;
+}
+
+/* Tarjeta "de vidrio" sobre la foto: blanco semitransparente y desenfoque */
+.av-vidrio {
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(6px);
+  box-shadow: var(--sombra-fuerte);
+}
+
+/* Texto chico y gris (atribuciones de fotos, ayudas) */
+.av-texto-suave {
+  font-size: 0.8rem;
+  color: var(--color-texto-suave);
+}
+
+/* Botones que "se levantan" al pasar el mouse (efecto de juego) */
+.av-elevable {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.av-elevable:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--sombra-suave);
+}

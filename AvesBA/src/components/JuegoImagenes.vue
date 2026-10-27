@@ -5,6 +5,7 @@ import TarjetaAve from './TarjetaAve.vue';
 import BotonOption from './BotonOption.vue';
 import EstadoJuego from './EstadoJuego.vue';
 import MensajeResultado from './MensajeResultado.vue';
+import ResultadoFinal from './ResultadoFinal.vue';
 import { calcularPuntos } from '@/juego/puntaje.js';
 
 const TOTAL_PREGUNTAS = 10;
@@ -128,47 +129,50 @@ async function siguientePregunta() {
 
 <template>
     <div>
-        <h1 class="titulo">Aves BA</h1>
-        <div v-if="cargando">Cargando...</div>
-        <div v-else-if="error">
-            <p class="error">{{ error }}</p>
-            <button class="boton boton-principal" @click="cargarPartida">Reintentar</button>
+        <!-- Cargando: pajarito que aletea (av-anim-aleteo, estilos/animaciones.css)
+             y barra de Bulma sin valor, que se mueve sola. -->
+        <div v-if="cargando" class="has-text-centered py-5">
+            <p class="is-size-1"><span class="av-anim-aleteo">🐦</span></p>
+            <p class="mb-3 has-text-weight-semibold">Buscando aves...</p>
+            <progress class="progress is-small is-primary" max="100"></progress>
         </div>
-        <div v-else-if="terminada" class="final">
-            <p>Partida terminada!</p>
-            <p>Aciertos: {{ aciertos }}</p>
-            <p>XP obtenida: {{ xp }}</p>
-            <button class="boton boton-principal" @click="cargarPartida">Reiniciar</button>
+
+        <!-- Error: aviso rojo de Bulma (notification is-danger is-light) -->
+        <div v-else-if="error" class="notification is-danger is-light">
+            <p class="mb-3">{{ error }}</p>
+            <button class="button is-danger" @click="cargarPartida">Reintentar</button>
         </div>
+
+        <!-- Fin de la partida: componente propio con medalla y estrellas -->
+        <ResultadoFinal v-else-if="terminada" :aciertos="aciertos" :total="TOTAL_PREGUNTAS" :xp="xp" @reiniciar="cargarPartida" />
+
         <div v-else-if="pregunta">
             <EstadoJuego :numeroPregunta="numeroPregunta" :aciertos="aciertos" :totalPreguntas="TOTAL_PREGUNTAS" :racha="racha" :xp="xp" />
-            <TarjetaAve :foto="pregunta.foto" :atribucion="pregunta.atribucion" />
-            <BotonOption v-for="opcion in pregunta.opciones" :key="opcion.id"
-                :nombre="opcion.nombre"
-                :nombreCientifico="opcion.nombreCientifico"
-                :estado="estadoDe(opcion)"
-                :deshabilitado="elegida !== null"
-                @elegir="responder(opcion)" />
 
-            <MensajeResultado v-if="respondida" :acerto="acerto" :nombreCorrecto="pregunta.nombre" />
-            <button v-if="respondida" class="boton boton-principal" @click="siguientePregunta">Siguiente</button>
+            <!-- <Transition name="pregunta">: al cambiar de pregunta cambia la :key,
+                 Vue saca la vieja y mete la nueva, animadas (estilos/animaciones.css). -->
+            <Transition name="pregunta" mode="out-in">
+                <div :key="pregunta.id">
+                    <TarjetaAve :foto="pregunta.foto" :atribucion="pregunta.atribucion" />
+                    <p class="has-text-weight-bold mb-2">¿Qué ave es esta?</p>
+                    <BotonOption v-for="opcion in pregunta.opciones" :key="opcion.id"
+                        :nombre="opcion.nombre"
+                        :nombreCientifico="opcion.nombreCientifico"
+                        :estado="estadoDe(opcion)"
+                        :deshabilitado="elegida !== null"
+                        @elegir="responder(opcion)" />
+                </div>
+            </Transition>
+
+            <!-- Resultado y botón para seguir: aparecen al responder -->
+            <Transition name="aparecer">
+                <div v-if="respondida" class="mt-4">
+                    <MensajeResultado :acerto="acerto" :nombreCorrecto="pregunta.nombre" />
+                    <button class="button is-primary is-fullwidth is-medium av-elevable" @click="siguientePregunta">
+                        {{ numeroPregunta < TOTAL_PREGUNTAS ? 'Siguiente →' : 'Ver resultado 🏁' }}
+                    </button>
+                </div>
+            </Transition>
         </div>
     </div>
 </template>
-
-<style scoped>
-.titulo {
-    margin: 0 0 0.75rem;
-    font-size: 1.25rem;
-    text-align: center;
-}
-.error {
-    color: var(--color-error-texto);
-}
-.final {
-    text-align: center;
-}
-.boton-principal {
-    font-size: 1rem;
-}
-</style>
