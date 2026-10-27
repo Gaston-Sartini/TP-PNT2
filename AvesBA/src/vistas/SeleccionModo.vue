@@ -1,18 +1,20 @@
 <script setup>
 import JuegoImagenes from '../components/JuegoImagenes.vue';
 import {ref} from 'vue';
-import { useRouter } from 'vue-router';
-import { logout } from '../servicios/authService.js';
+import { useRouter } from 'vue-router'; // sirve para ingresar al desde el codigo a la ruta de la pagina, es decir, para poder redirigir a otra pagina desde el codigo.
+import { useAuthStore } from '../stores/auth';
 
 const modo = ref('');
 const router = useRouter();
+const authStore = useAuthStore();
 
 function mostrarResultado(event) {
     console.log('Partida terminada con aciertos:', event.aciertos, 'de', event.total, 'y XP:', event.xp);
 }
 
+//le pega al backend para invalidar la sesión del lado del servidor
 async function cerrarSesion() {
-  await logout();
+  await authStore.cerrarSesion();
   router.push('/');
 }
 </script>
@@ -25,7 +27,7 @@ async function cerrarSesion() {
       <router-link to="/datos-jugador" class="boton-nav">Datos del Jugador</router-link>
       <router-link to="/ranking" class="boton-nav">Ranking</router-link>
       <router-link to="/metricas" class="boton-nav">Métricas</router-link>
-      <button type="button" class="boton-nav" @click="cerrarSesion">Cerrar Sesión</button>
+      <button type="button" class="boton-nav" @click="cerrarSesion">Cerrar Sesión</button> 
     </nav>
     <div class="contenido">
       <div class="modos">

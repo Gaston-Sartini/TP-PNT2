@@ -1,31 +1,24 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { obtenerPerfil } from '../servicios/authService.js';
+import { onMounted } from 'vue';
+import { useAuthStore } from '../stores/auth';
 
-const jugador = ref(null);
-const cargando = ref(true);
-const error = ref('');
+const authStore = useAuthStore();
 
-onMounted(async () => {
-  try {
-    jugador.value = await obtenerPerfil();
-  } catch (err) {
-    error.value = err.message;
-  } finally {
-    cargando.value = false;
-  }
+onMounted(() => {
+  authStore.cargarPerfil();
 });
 </script>
 
+// Componente para mostrar los datos del jugador.
 <template>
   <div>
     <h1>Datos del Jugador</h1>
-    <p v-if="cargando">Cargando...</p>
-    <p v-else-if="error" class="error">{{ error }}</p>
+    <p v-if="authStore.cargando">Cargando...</p>
+    <p v-else-if="authStore.error" class="error">{{ authStore.error }}</p>
     <div v-else>
-      <p><strong>Nombre:</strong> {{ jugador.nombre }} {{ jugador.apellido }}</p>
-      <p><strong>Email:</strong> {{ jugador.email }}</p>
-      <p><strong>Rol:</strong> {{ jugador.role }}</p>
+      <p><strong>Nombre:</strong> {{ authStore.nombreCompleto }}</p>
+      <p><strong>Email:</strong> {{ authStore.jugador.email }}</p>
+      <p><strong>Rol:</strong> {{ authStore.jugador.role }}</p>
     </div>
   </div>
 </template>
