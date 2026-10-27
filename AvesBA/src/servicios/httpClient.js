@@ -38,11 +38,13 @@ async function hacerRequest(endpoint, opciones = {}) {
       // El backend manda "detail" como texto, o como lista cuando los datos son inválidos (422)
       const detalle = errorData.detail;
       const mensaje = typeof detalle === 'string' ? detalle : detalle?.[0]?.msg;
-      throw new Error(
+      const error = new Error(
         mensaje ||
         errorData.mensaje ||
         `Error ${response.status}: ${response.statusText}`
       );
+      error.status = response.status;
+      throw error;
     }
 
     // Parsear y retornar respuesta

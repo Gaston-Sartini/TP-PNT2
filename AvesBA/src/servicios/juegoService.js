@@ -18,7 +18,15 @@ export async function obtenerPreguntas() {
 export async function enviarRespuesta(ave, opcion)  {
     return await http.post(`${BASE}/respuesta`, {
         ave_id: ave.id,
-        ave_nombre: ave.nombre,
         respuesta_usuario: opcion.nombre
     });
+}
+
+export async function obtenerSesionActiva() {
+    try {
+        return await http.get(`${BASE}/sesion`);
+    } catch (err) {
+        if(err.status === 404) return null;
+        throw err;
+    }
 }
