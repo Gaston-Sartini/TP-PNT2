@@ -18,6 +18,8 @@ Además, **cada componente** tiene su propio `<style scoped>` para lo que es sol
 
 Las tipografías (Nunito para textos y Fredoka para títulos) se cargan desde Google Fonts en `index.html`.
 
+**Gráficos (ApexCharts):** sus colores se escriben en JavaScript, así que no pueden usar `var(--...)` directamente. Para no copiar la paleta, `src/estilos/graficos.js` tiene `color('musgo')` y `fuente()`, que leen los valores de `tema.css`. Los usan `Metricas.vue` y `MetricasAdmin.vue`.
+
 ## 2. La regla para leer cualquier clase
 
 Cuando veas una clase en un template, fijate cómo empieza:

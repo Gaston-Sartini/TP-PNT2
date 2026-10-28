@@ -51,6 +51,7 @@ Vas a escribir el archivo **de arriba hacia abajo**: primero el `<script setup>`
 import { ref, computed, onMounted } from 'vue';
 import VueApexCharts from 'vue3-apexcharts';
 import { obtenerMisMetricas, obtenerRanking } from '../servicios/metricasService.js';
+import { color, fuente } from '../estilos/graficos.js';
 
 // ---------- 1) Los datos que vienen del backend ----------
 const metricas = ref(null);
@@ -162,12 +163,10 @@ Volvé al `<script setup>` y agregá esto **antes** del `</script>` (sacá el te
 
 ```js
 // ---------- 3) Cómo se ve cada gráfico ----------
-// Los colores se leen de src/estilos/tema.css, así hay una sola paleta para toda la app.
-const color = nombre => getComputedStyle(document.documentElement).getPropertyValue(`--color-${nombre}`).trim();
-const fuente = getComputedStyle(document.documentElement).getPropertyValue('--fuente-texto').trim();
+// color() y fuente() leen la paleta de src/estilos/tema.css (ver src/estilos/graficos.js).
 
 const opcionesDona = {
-  chart: { fontFamily: fuente },
+  chart: { fontFamily: fuente() },
   labels: ['Aciertos', 'Fallos'],
   colors: [color('hoja'), color('terracota')],
   legend: { position: 'bottom' },
@@ -177,7 +176,7 @@ const opcionesDona = {
 };
 
 const opcionesPrecision = {
-  chart: { fontFamily: fuente },
+  chart: { fontFamily: fuente() },
   labels: ['Precisión'],
   colors: [color('musgo')],
   plotOptions: {
@@ -194,7 +193,7 @@ const opcionesPrecision = {
 
 // Las barras dependen de quiénes aparecen, por eso estas opciones son un computed
 const opcionesComparacion = computed(() => ({
-  chart: { fontFamily: fuente, toolbar: { show: false } },
+  chart: { fontFamily: fuente(), toolbar: { show: false } },
   plotOptions: { bar: { horizontal: true, borderRadius: 6, distributed: true } },
   // Mi barra en dorado, las demás en musgo
   colors: jugadoresComparados.value.map(j => (j.user_id === metricas.value?.user_id ? color('dorado') : color('musgo'))),
@@ -204,7 +203,7 @@ const opcionesComparacion = computed(() => ({
 }));
 ```
 
-**La función `color` es la estrella de este nivel:** ApexCharts necesita los colores escritos en JavaScript, pero nuestra paleta vive en `src/estilos/tema.css`. En vez de copiar los códigos (y que el día que cambie un color haya que cambiarlo en dos lados), `color('musgo')` va a buscar el valor de `--color-musgo` a la página. **Una sola paleta para toda la app.**
+**La función `color` es la estrella de este nivel** (la importaste en el nivel 1 desde `src/estilos/graficos.js`): ApexCharts necesita los colores escritos en JavaScript, pero nuestra paleta vive en `src/estilos/tema.css`. En vez de copiar los códigos (y que el día que cambie un color haya que cambiarlo en dos lados), `color('musgo')` va a buscar el valor de `--color-musgo` a la página. `fuente()` hace lo mismo con la tipografía. Las usa también el panel de administración: **una sola paleta para toda la app.**
 
 **Detalles:**
 - **`labels` va en plural.** Si escribís `label`, ApexCharts lo ignora y la leyenda dice "series-1". 🙃
