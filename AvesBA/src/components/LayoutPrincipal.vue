@@ -61,6 +61,13 @@ async function cerrarSesion() {
               <li><router-link to="/ranking" active-class="is-active">🏆 Ranking</router-link></li>
               <li><router-link to="/metricas" active-class="is-active">📊 Métricas</router-link></li>
             </ul>
+
+            <template v-if="authStore.esAdmin">
+              <p class="menu-label">Administración</p>
+              <ul class="menu-list">
+                <li><router-link to="/admin/metricas" active-class="is-active">🛠️ Panel admin</router-link></li>
+              </ul>
+            </template>
           </div>
         </aside>
 
