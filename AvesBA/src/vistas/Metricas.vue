@@ -85,6 +85,13 @@ const opcionesComparacion = computed(() => ({
   legend: { show: false },
   tooltip: { y: { formatter: valor => `${valor} puntos` } },
 }));
+const formatearTiempo = segundos => {
+  if (segundos == null) return '—';
+  const horas = Math.floor(segundos / 3600);
+  const minutos = Math.floor((segundos % 3600) / 60);
+  if (horas === 0) return `${minutos} min`;
+  return `${horas} h ${minutos} min`;
+};
 </script>
 
 
@@ -105,28 +112,40 @@ const opcionesComparacion = computed(() => ({
 
     <template v-else>
       <div class="columns is-multiline">
-        <div class="column is-6-tablet is-3-desktop">
+        <div class="column is-6-tablet is-4-desktop">
           <div class="box av-kpi">
             <p class="heading">Puntos</p>
             <p class="title is-3">⭐ {{ metricas.puntuacion_total }}</p>
           </div>
         </div>
-        <div class="column is-6-tablet is-3-desktop">
+        <div class="column is-6-tablet is-4-desktop">
           <div class="box av-kpi">
             <p class="heading">Posición en el ranking</p>
             <p class="title is-3">🏆 #{{ metricas.posicion_ranking }}</p>
           </div>
         </div>
-        <div class="column is-6-tablet is-3-desktop">
+        <div class="column is-6-tablet is-4-desktop">
           <div class="box av-kpi">
             <p class="heading">Precisión</p>
             <p class="title is-3">🎯 {{ Math.round(metricas.porcentaje_acierto) }}%</p>
           </div>
         </div>
-        <div class="column is-6-tablet is-3-desktop">
+                <div class="column is-6-tablet is-4-desktop">
           <div class="box av-kpi">
             <p class="heading">Respuestas</p>
             <p class="title is-3">🐦 {{ metricas.total_intentos }}</p>
+          </div>
+        </div>
+        <div class="column is-6-tablet is-4-desktop">
+          <div class="box av-kpi">
+            <p class="heading">Tiempo conectado hoy</p>
+            <p class="title is-3">⏱️ {{ formatearTiempo(metricas.tiempo_conectado_hoy_seg) }}</p>
+          </div>
+        </div>
+        <div class="column is-6-tablet is-4-desktop">
+          <div class="box av-kpi">
+            <p class="heading">Tiempo conectado total</p>
+            <p class="title is-3">⌛ {{ formatearTiempo(metricas.tiempo_conectado_total_seg) }}</p>
           </div>
         </div>
       </div>
