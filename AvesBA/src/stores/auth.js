@@ -20,6 +20,7 @@ export const useAuthStore = defineStore('auth', {
       try {
         this.jugador = await obtenerPerfil()
       } catch (err) {
+        this.jugador = null
         this.error = err.message
       } finally {
         this.cargando = false
