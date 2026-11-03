@@ -7,9 +7,13 @@ export async function obtenerMisMetricas() {
 }
 
 export async function obtenerRanking(limite = 10) {
-    const response = await http.get(`${BASE}/juego/ranking?limit=${limite}`);
+    const response = await obtenerRankingCompleto(limite);
     const ranking = response.ranking;
     return ranking;
+}
+
+export async function obtenerRankingCompleto(limite = 10) {
+    return await http.get(`${BASE}/juego/ranking?limit=${limite}`);
 }
 
 export async function obtenerMetricasGlobales() {
