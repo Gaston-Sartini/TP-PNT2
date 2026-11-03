@@ -2,21 +2,15 @@
 import { onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from './stores/auth.js'
-import { API_BASE_URL } from './servicios/httpClient.js'
 import LayoutPrincipal from './components/LayoutPrincipal.vue'
 
 const route = useRoute()
 const authStore = useAuthStore()
 
+// La lógica de armar y enviar el beacon vive ahora en el store (auth.js: registrarTiempoConectado),
+// así se reutiliza también desde cerrarSesion() cuando el usuario hace logout explícito.
 const handleWindowClose = () => {
-  if (!authStore.horaIngreso) return
-  const tiempoConectado = Date.now() - authStore.horaIngreso
-  const url = `${API_BASE_URL}/api/user-connection-log`
-  const data = JSON.stringify({
-    userId: authStore.jugador?.id ?? null,
-    tiempoConectado
-  })
-  navigator.sendBeacon(url, data)
+  authStore.registrarTiempoConectado()
 }
 
 window.addEventListener('beforeunload', handleWindowClose)
