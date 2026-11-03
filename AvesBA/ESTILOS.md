@@ -167,17 +167,31 @@ Subir y bajar mientras se inclina de un lado al otro da la sensación de aleteo.
 | Archivo | Clases de Bulma principales | Propio |
 |---|---|---|
 | `App.vue` | — | Elige si la pantalla va dentro del layout (`meta.conMenu` del router) y anima el cambio de ruta (`pagina`) |
-| `components/LayoutPrincipal.vue` | `navbar`, `section`, `columns`, `column`, `box`, `menu` | Barra verde bosque con línea dorada; menú activo en musgo; en celular el menú pasa a una fila |
+| `components/LayoutPrincipal.vue` | `navbar`, `navbar-burger`, `section`, `columns`, `column`, `box`, `menu`, `is-hidden-mobile` | Barra verde bosque con línea dorada; menú activo en musgo; en PC barra y menú más grandes y el menú mide lo que su contenido (`is-narrow-desktop`); en celular el menú se esconde detrás del botón ☰. Deja dos lugares vacíos (`#av-lugar-boton-modos` en la barra y `#av-lugar-modos` debajo del menú) que llena `SeleccionModo` con `<Teleport>` |
 | `vistas/Login.vue` | `hero is-fullheight`, `box`, `field`, `input`, `button is-primary`, `notification` | Foto de portada (`av-fondo-paisaje`), tarjeta de vidrio, título crema con sombra |
 | `vistas/Registro.vue` | Igual que Login | Igual que Login |
-| `vistas/SeleccionModo.vue` | `buttons`, `button`, `box`, `notification` | Cartel con la foto, área de juego centrada |
-| `components/JuegoImagenes.vue` | `progress`, `notification`, `button` | Transiciones `pregunta` y `aparecer`, pajarito de carga |
+| `vistas/SeleccionModo.vue` | `buttons`, `button`, `box`, `menu-label`, `notification`, `tag`, `is-hidden-mobile`, `is-hidden-tablet` | Antes de elegir: cartel con la foto y los modos grandes en columna. Al elegir: el cartel desaparece y los modos se achican y se mudan con `<Teleport>`: en PC, en columna debajo del menú; en celular, escondidos hasta tocar el botón "🎮 Modo" de la barra. En PC el área de juego es más ancha |
+| `components/JuegoImagenes.vue` | `progress`, `notification`, `button`, `columns is-desktop` | En PC, foto a la izquierda y opciones a la derecha; en celular, el resultado y "Siguiente" quedan fijos abajo (`position: sticky`). Transiciones `pregunta` y `aparecer`, pajarito de carga |
 | `components/EstadoJuego.vue` | `tags`, `tag`, `progress` | Números con `pop`, racha con `av-anim-brillo` |
-| `components/TarjetaAve.vue` | `image` | Marco de madera, fondo celeste detrás de la foto |
-| `components/BotonOption.vue` | `button`, `is-success`, `is-danger` | Dos renglones (nombre y nombre científico), latido o sacudida |
+| `components/TarjetaAve.vue` | `image` | Marco de madera, fondo celeste detrás de la foto; alto máximo según la pantalla (`vh`) |
+| `components/BotonOption.vue` | `button`, `is-success`, `is-danger` | Dos renglones (nombre y nombre científico), latido o sacudida; un poco más bajas en PC y más compactas en celular |
 | `components/MensajeResultado.vue` | `notification is-success/is-danger is-light` | Ícono a la izquierda |
 | `components/ResultadoFinal.vue` | `level`, `box`, `title`, `heading`, `button` | Trofeo con rebote, estrellas doradas |
 | `vistas/DatosJugador.vue` | `box`, `media`, `tag`, `progress` | Avatar redondo con la inicial |
+
+### Tamaños de pantalla
+
+Los cortes son los mismos de Bulma, así las clases `is-hidden-mobile`, `is-*-desktop`, etc. y nuestros `@media` cambian en el mismo punto:
+
+| Nombre | Ancho | Cómo se escribe en CSS |
+|---|---|---|
+| Celular | hasta 768px | `@media (max-width: 768px)` |
+| Tablet | desde 769px | (las clases de Bulma `-tablet`) |
+| PC | desde 1024px | `@media (min-width: 1024px)` |
+
+`vh` es un porcentaje del alto de la ventana: `max-height: 58vh` significa "como máximo, el 58 % del alto de la pantalla". Se usa en la foto del ave para que el juego entre sin scrollear.
+
+Ojo al probar en PC: si Windows tiene la escala de pantalla en 125 %, una pantalla de 1920 × 1080 se comporta como una de 1536 × 864 (y descontando la barra del navegador, unos 1520 × 700). Hay que probar con ese tamaño, no con el de la pantalla.
 
 ## 8. Cambios de estructura que vinieron con el diseño
 

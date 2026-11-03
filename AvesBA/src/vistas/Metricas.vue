@@ -1,6 +1,7 @@
 <script setup>
 import VueApexCharts from 'vue3-apexcharts';
 import { obtenerMisMetricas, obtenerRanking } from '../servicios/metricasService.js';
+import { color, fuente } from '../estilos/graficos.js';
 import { ref, computed, onMounted } from 'vue';
 
 const metricas = ref(null);
@@ -46,11 +47,10 @@ const jugadoresComparados = computed(() => {
 const serieComparacion = computed(() => [
   { name: 'Puntos', data: jugadoresComparados.value.map(j => j.puntos_totales) },
 ]);
-const color = nombre => getComputedStyle(document.documentElement).getPropertyValue(`--color-${nombre}`).trim();
-const fuente = getComputedStyle(document.documentElement).getPropertyValue('--fuente-texto').trim();
+// color() y fuente() leen la paleta de src/estilos/tema.css (ver src/estilos/graficos.js).
 
 const opcionesDona = {
-  chart: { fontFamily: fuente },
+  chart: { fontFamily: fuente() },
   labels: ['Aciertos', 'Fallos'],
   colors: [color('hoja'), color('terracota')],
   legend: { position: 'bottom' },
@@ -60,7 +60,7 @@ const opcionesDona = {
 };
 
 const opcionesPrecision = {
-  chart: { fontFamily: fuente },
+  chart: { fontFamily: fuente() },
   labels: ['Precisión'],
   colors: [color('musgo')],
   plotOptions: {
@@ -77,7 +77,7 @@ const opcionesPrecision = {
 
 
 const opcionesComparacion = computed(() => ({
-  chart: { fontFamily: fuente, toolbar: { show: false } },
+  chart: { fontFamily: fuente(), toolbar: { show: false } },
   plotOptions: { bar: { horizontal: true, borderRadius: 6, distributed: true } },
   
   colors: jugadoresComparados.value.map(j => (j.user_id === metricas.value?.user_id ? color('dorado') : color('musgo'))),

@@ -152,27 +152,83 @@ async function siguientePregunta() {
             <!-- <Transition name="pregunta">: al cambiar de pregunta cambia la :key,
                  Vue saca la vieja y mete la nueva, animadas (estilos/animaciones.css). -->
             <Transition name="pregunta" mode="out-in">
-                <div :key="pregunta.id">
-                    <TarjetaAve :foto="pregunta.foto" :atribucion="pregunta.atribucion" />
-                    <p class="has-text-weight-bold mb-2">¿Qué ave es esta?</p>
-                    <BotonOption v-for="opcion in pregunta.opciones" :key="opcion.id"
-                        :nombre="opcion.nombre"
-                        :nombreCientifico="opcion.nombreCientifico"
-                        :estado="estadoDe(opcion)"
-                        :deshabilitado="elegida !== null"
-                        @elegir="responder(opcion)" />
-                </div>
-            </Transition>
+                <!-- columns is-desktop (Bulma): en pantallas grandes, foto a la izquierda y
+                     opciones a la derecha, para que entre todo sin scrollear.
+                     En celular y tablet se apilan, una debajo de la otra. -->
+                <div :key="pregunta.id" class="columns is-desktop av-columnas-juego">
+                    <div class="column is-7-desktop">
+                        <TarjetaAve :foto="pregunta.foto" :atribucion="pregunta.atribucion" />
+                    </div>
+                    <div class="column is-5-desktop">
+                        <p class="has-text-weight-bold mb-2">¿Qué ave es esta?</p>
+                        <BotonOption v-for="opcion in pregunta.opciones" :key="opcion.id"
+                            :nombre="opcion.nombre"
+                            :nombreCientifico="opcion.nombreCientifico"
+                            :estado="estadoDe(opcion)"
+                            :deshabilitado="elegida !== null"
+                            @elegir="responder(opcion)" />
 
-            <!-- Resultado y botón para seguir: aparecen al responder -->
-            <Transition name="aparecer">
-                <div v-if="respondida" class="mt-4">
-                    <MensajeResultado :acerto="acerto" :nombreCorrecto="pregunta.nombre" />
-                    <button class="button is-primary is-fullwidth is-medium av-elevable" @click="siguientePregunta">
-                        {{ numeroPregunta < TOTAL_PREGUNTAS ? 'Siguiente →' : 'Ver resultado 🏁' }}
-                    </button>
+                        <!-- Resultado y botón para seguir: aparecen al responder.
+                             av-pie-respuesta: en celular queda fijo abajo de la pantalla (ver style). -->
+                        <Transition name="aparecer">
+                            <div v-if="respondida" class="av-pie-respuesta">
+                                <MensajeResultado :acerto="acerto" :nombreCorrecto="pregunta.nombre" />
+                                <button class="button is-primary is-fullwidth is-medium av-elevable" @click="siguientePregunta">
+                                    {{ numeroPregunta < TOTAL_PREGUNTAS ? 'Siguiente →' : 'Ver resultado 🏁' }}
+                                </button>
+                            </div>
+                        </Transition>
+                    </div>
                 </div>
             </Transition>
         </div>
     </div>
 </template>
+
+<style scoped>
+/* De dónde sale cada estilo:
+   - columns, column, is-*-desktop, button, notification, progress: Bulma.
+   - Transiciones "pregunta" y "aparecer", y av-anim-aleteo: estilos/animaciones.css.
+   - Lo de abajo es solo de este componente. */
+
+/* Menos separación entre la foto y las opciones que la que pone Bulma por defecto */
+.av-columnas-juego {
+    margin-bottom: 0;
+}
+
+.av-pie-respuesta {
+    margin-top: 0.75rem;
+}
+/* El aviso de acierto/error, más bajo que el de Bulma por defecto.
+   .notification es la raíz de MensajeResultado: los estilos scoped del padre
+   llegan al elemento raíz de un componente hijo (regla de Vue). */
+.av-pie-respuesta .notification {
+    padding: 0.6rem 1rem;
+    margin-bottom: 0.6rem;
+}
+
+/* En celular (hasta 768px, el corte "mobile" de Bulma): el resultado y el botón
+   "Siguiente" quedan pegados abajo de la pantalla (position: sticky), así no
+   hay que bajar para encontrarlos después de responder. */
+@media (max-width: 768px) {
+    .av-pie-respuesta {
+        position: sticky;
+        bottom: 0;
+        z-index: 2;
+        margin: 0.5rem -0.75rem 0;
+        padding: 0.75rem;
+        background: white;
+        border-top: 1px solid #ddd8c4;
+        box-shadow: 0 -6px 14px rgba(38, 48, 26, 0.12);
+    }
+    /* Más bajos para tapar lo menos posible las opciones */
+    .av-pie-respuesta .notification {
+        padding: 0.5rem 0.75rem;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+    .av-pie-respuesta .button {
+        font-size: 1rem;
+    }
+}
+</style>

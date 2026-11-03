@@ -35,4 +35,15 @@ const props = defineProps({
     object-fit: contain;
     background: var(--color-cielo);
 }
+
+/* Que la foto nunca sea más alta que una parte de la pantalla (vh = % del alto
+   de la ventana), para que entren también el marcador y las opciones. */
+.av-imagen-ave {
+    max-height: 30vh;
+}
+@media (min-width: 1024px) {
+    .av-imagen-ave {
+        max-height: 58vh;
+    }
+}
 </style>

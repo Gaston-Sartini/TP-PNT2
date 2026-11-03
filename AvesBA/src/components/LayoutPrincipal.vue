@@ -3,12 +3,15 @@
 // Es el mismo patrón que el MainLayout de la clase 8: el contenido de
 // cada pantalla entra por el <slot>. Qué rutas lo usan se decide en
 // router/index.js con meta: { conMenu: true }.
-import { onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 
 const router = useRouter();
 const authStore = useAuthStore();
+
+// En celular el menú lateral se esconde y se abre con el botón ☰ de la barra
+const menuAbierto = ref(false);
 
 // Trae los datos del jugador para mostrar su nombre en la barra
 onMounted(() => {
@@ -32,14 +35,25 @@ async function cerrarSesion() {
           <span class="av-marca-icono">🐦</span> Aves BA
         </router-link>
 
-        <div class="navbar-item ml-auto">
-          <span v-if="authStore.jugador" class="mr-3 is-hidden-mobile av-saludo">
+        <div class="navbar-item ml-auto av-barra-acciones">
+          <span v-if="authStore.jugador" class="mr-4 is-hidden-mobile av-saludo">
             Hola, <strong class="av-saludo">{{ authStore.jugador.nombre }}</strong>
           </span>
-          <button type="button" class="button is-small is-light av-elevable" @click="cerrarSesion">
+          <!-- Lugar vacío: SeleccionModo pone acá el botón "Modo" (solo en celular) con <Teleport> -->
+          <span id="av-lugar-boton-modos"></span>
+          <button type="button" class="button is-light av-elevable av-boton-salir" @click="cerrarSesion">
             Cerrar sesión
           </button>
         </div>
+
+        <!-- Botón ☰ para abrir el menú en celular (navbar-burger: Bulma; is-hidden-tablet: solo en celular) -->
+        <a role="button" class="navbar-burger is-hidden-tablet av-hamburguesa" :class="{ 'is-active': menuAbierto }"
+          aria-label="Abrir el menú" :aria-expanded="menuAbierto" @click="menuAbierto = !menuAbierto">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
       </div>
     </nav>
 
@@ -48,8 +62,11 @@ async function cerrarSesion() {
       <div class="columns">
         <!-- Menú lateral. Clases de Bulma: box, menu, menu-label, menu-list.
              active-class="is-active" hace que Bulma pinte el link de la página actual. -->
-        <aside class="column is-3-tablet is-3-desktop is-2-fullhd">
-          <div class="box menu av-menu">
+        <!-- is-narrow-desktop (Bulma): en PC la columna mide lo que necesita su contenido.
+             En celular, is-hidden-mobile esconde el menú hasta que se toca el ☰.
+             Al elegir una opción (@click) se vuelve a cerrar. -->
+        <aside class="column is-3-tablet is-narrow-desktop av-lateral">
+          <div class="box menu av-menu" :class="{ 'is-hidden-mobile': !menuAbierto }" @click="menuAbierto = false">
             <p class="menu-label">Jugar</p>
             <ul class="menu-list">
               <li><router-link to="/modo" active-class="is-active">🎯 Jugar individual</router-link></li>
@@ -69,6 +86,10 @@ async function cerrarSesion() {
               </ul>
             </template>
           </div>
+
+          <!-- Lugar vacío: SeleccionModo pone acá los modos de juego con <Teleport>.
+               En PC quedan debajo del menú; en celular, arriba del juego. -->
+          <div id="av-lugar-modos"></div>
         </aside>
 
         <!-- Acá entra cada pantalla -->
@@ -103,7 +124,7 @@ async function cerrarSesion() {
 }
 .av-marca {
   font-family: var(--fuente-titulos);
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   font-weight: 600;
   color: var(--color-crema);
 }
@@ -135,6 +156,11 @@ async function cerrarSesion() {
 /* En celulares (menos de 769px, el mismo corte que usa Bulma) el menú pasa
    a ser una fila compacta de botones, para no tapar el juego. */
 @media (max-width: 768px) {
+  /* Sin el relleno de la columna, para no dejar un hueco cuando el menú está cerrado */
+  .av-lateral {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
   .av-menu {
     display: flex;
     flex-wrap: wrap;
@@ -149,6 +175,64 @@ async function cerrarSesion() {
   }
   .av-menu .menu-list a {
     padding: 0.35rem 0.6rem;
+    font-size: 0.85rem;
+  }
+}
+
+/* "Cerrar sesión": chico en celular y tablet; en PC se agranda (ver abajo) */
+.av-boton-salir {
+  font-size: 0.85rem;
+}
+
+/* En celulares angostos (375px) la barra tiene que hacer lugar para la marca,
+   el botón "Modo", "Cerrar sesión" y el ☰: todo un poco más apretado. */
+@media (max-width: 768px) {
+  .av-marca {
+    font-size: 1.25rem;
+    padding-left: 0.5rem;
+    padding-right: 0.25rem;
+  }
+  .av-barra-acciones {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+  }
+  .av-boton-salir {
+    padding-left: 0.7em;
+    padding-right: 0.7em;
+  }
+}
+
+/* Botón ☰ en crema, para que se vea sobre el verde */
+.av-hamburguesa {
+  color: var(--color-crema);
+}
+
+/* En pantallas grandes (desde 1024px, el corte "desktop" de Bulma) todo
+   un poco más grande: barra más alta, marca, saludo, botón y menú. */
+@media (min-width: 1024px) {
+  .av-barra {
+    min-height: 3.5rem;
+  }
+  .av-marca {
+    font-size: 1.65rem;
+  }
+  .av-marca-icono {
+    font-size: 1.75rem;
+  }
+  .av-saludo {
+    font-size: 1.05rem;
+  }
+  .av-boton-salir {
+    font-size: 0.95rem;
+  }
+  .av-menu {
+    font-size: 1.1rem;
+  }
+  /* Cada opción del menú en un solo renglón ("Datos del jugador") */
+  .av-menu .menu-list a {
+    white-space: nowrap;
+  }
+  .av-menu .menu-label {
     font-size: 0.85rem;
   }
 }

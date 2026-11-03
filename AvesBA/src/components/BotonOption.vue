@@ -71,4 +71,21 @@ const clasesEstado = computed(() => {
 .av-opcion.is-danger .av-cientifico {
     color: white;
 }
+
+/* En PC, un poco más bajas para que entren las cuatro y el botón "Siguiente" */
+@media (min-width: 1024px) {
+    .av-opcion {
+        padding: 0.5rem 1rem;
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* En celular, opciones más compactas para que entren las cuatro */
+@media (max-width: 768px) {
+    .av-opcion {
+        padding: 0.45rem 0.8rem;
+        margin-bottom: 0.45rem;
+        font-size: 0.95rem;
+    }
+}
 </style>
